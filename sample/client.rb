@@ -43,7 +43,6 @@ end
 def play
   @speaker.play 'x-sonos-spotify:spotify%3atrack%3a66mB55sZuDHlXt3vAcVkXf?sid=9&amp;flags=0'
   @speaker.volume = 5
-  @speaker.play
 end
 
 def stop
@@ -51,7 +50,6 @@ def stop
 end
 
 def cycle
-  initialize_variables
   color = [@light.x, @light.y]
   while @speaker.is_playing?
     sleep 2
@@ -81,10 +79,12 @@ def initialize_variables
   end
 
   @system = Sonos::System.new
-  @speaker = @system.speakers.fetch(1)
+  @speaker = @system.speakers.fetch(0)
+  i = 0
   while @speaker.name != 'Kantine'
-    @system = Sonos::System.new
-    @speaker = @system.speakers.fetch(1)
+    i = 0 if i > 7
+    @speaker = @system.speakers.fetch(i)
+    i += 1
   end
 end
 

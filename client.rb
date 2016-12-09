@@ -11,29 +11,26 @@ ws = WebSocket::Client::Simple.connect 'ws://kerst-2016-server.herokuapp.com'
 
 ws.on :message do |msg|
   puts ">> #{msg.data}"
-  if msg.to_s == 'christmas'
-    start_christmas
-  end
+  start_christmas if msg.to_s == 'christmas'
 end
 
 ws.on :open do
   puts "-- websocket open (#{ws.url})"
-end
-
-ws.on :close do |e|
-  puts "-- websocket close (#{e.inspect})"
-  exit 1
+  ws.send 'ping'
 end
 
 ws.on :error do |e|
   puts "-- error (#{e.inspect})"
+  ws.close
+  ws = WebSocket::Client::Simple.connect 'ws://kerst-2016-server.herokuapp.com'
+end
+
+ws.on :close do
+  ws = WebSocket::Client::Simple.connect 'ws://kerst-2016-server.herokuapp.com'
 end
 
 def start_christmas
   initialize_variables
-  # zodat alex niet boos wordt :(
-  @light.brightness = 1
-
   @time = Time.now
   play
   @speaker.play

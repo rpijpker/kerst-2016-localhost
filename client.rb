@@ -6,12 +6,23 @@ require 'hue'
 require 'sonos'
 
 puts "websocket-client-simple v#{WebSocket::Client::Simple::VERSION}"
+puts Time.now.to_s
 
 ws = WebSocket::Client::Simple.connect 'ws://kerst-2016-server.herokuapp.com'
 
 ws.on :message do |msg|
-  puts ">> #{msg.data}"
-  start_christmas if msg.to_s == 'christmas'
+  puts ">> #{msg.data}  " + Time.now.to_s
+  if msg.to_s == 'Driving home for Christmas'
+    start_christmas('x-sonos-spotify:spotify%3atrack%3a66mB55sZuDHlXt3vAcVkXf?sid=9&amp;flags=0')
+  elsif msg.to_s == 'All I want for Christmas is you'
+    start_christmas('x-sonos-spotify:spotify%3atrack%3a5KdPyhcsQ5PvkvPBq6lLti?sid=9&amp;flags=0')
+  elsif msg.to_s == 'Last Christmas'
+    start_christmas('x-sonos-spotify:spotify%3atrack%3a0QPYn15U8IQHKcH2LDfrek?sid=9&amp;flags=0')
+  elsif msg.to_s == "It's beginning to look a lot like Christmas"
+    start_christmas('x-sonos-spotify:spotify%3atrack%3a5a1iz510sv2W9Dt1MvFd5R?sid=9&amp;flags=0')
+  end
+
+  start_christmas('x-sonos-spotify:spotify%3atrack%3a66mB55sZuDHlXt3vAcVkXf?sid=9&amp;flags=0') if msg.to_s == 'christmas'
 end
 
 ws.on :open do
@@ -21,6 +32,7 @@ end
 
 ws.on :error do |e|
   puts "-- error (#{e.inspect})"
+  puts Time.now.to_s
   ws.close
   ws = WebSocket::Client::Simple.connect 'ws://kerst-2016-server.herokuapp.com'
 end
@@ -29,16 +41,17 @@ ws.on :close do
   ws = WebSocket::Client::Simple.connect 'ws://kerst-2016-server.herokuapp.com'
 end
 
-def start_christmas
+def start_christmas(song)
   initialize_variables
   @time = Time.now
-  play
+  play(song)
   @speaker.play
   cycle
 end
 
-def play
-  @speaker.play 'x-sonos-spotify:spotify%3atrack%3a66mB55sZuDHlXt3vAcVkXf?sid=9&amp;flags=0'
+def play(song)
+  @speaker.play song
+  # @speaker.play 'x-sonos-spotify:spotify%3atrack%3a66mB55sZuDHlXt3vAcVkXf?sid=9&amp;flags=0'
   @speaker.volume = 5
 end
 

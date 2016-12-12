@@ -11,7 +11,7 @@ puts Time.now.to_s
 ws = WebSocket::Client::Simple.connect 'ws://kerst-2016-server.herokuapp.com'
 
 ws.on :message do |msg|
-  puts ">> #{msg.data}  " + Time.now.to_s
+  puts ">> #{msg.data}"
   if msg.to_s == 'Driving home for Christmas'
     start_christmas('x-sonos-spotify:spotify%3atrack%3a66mB55sZuDHlXt3vAcVkXf?sid=9&amp;flags=0')
   elsif msg.to_s == 'All I want for Christmas is you'
@@ -34,11 +34,11 @@ ws.on :error do |e|
   puts "-- error (#{e.inspect})"
   puts Time.now.to_s
   ws.close
-  ws = WebSocket::Client::Simple.connect 'ws://kerst-2016-server.herokuapp.com'
 end
 
 ws.on :close do
-  ws = WebSocket::Client::Simple.connect 'ws://kerst-2016-server.herokuapp.com'
+  sleep 1
+  ws.connect('ws://kerst-2016-server.herokuapp.com')
 end
 
 def start_christmas(song)
@@ -51,7 +51,6 @@ end
 
 def play(song)
   @speaker.play song
-  # @speaker.play 'x-sonos-spotify:spotify%3atrack%3a66mB55sZuDHlXt3vAcVkXf?sid=9&amp;flags=0'
   @speaker.volume = 5
 end
 

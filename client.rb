@@ -20,6 +20,10 @@ ws.on :message do |msg|
     start_christmas('x-sonos-spotify:spotify%3atrack%3a0QPYn15U8IQHKcH2LDfrek?sid=9&amp;flags=0')
   elsif msg.to_s == "It's beginning to look a lot like Christmas"
     start_christmas('x-sonos-spotify:spotify%3atrack%3a5a1iz510sv2W9Dt1MvFd5R?sid=9&amp;flags=0')
+  elsif msg.to_s == 'Jingle bell rock'
+    start_christmas('x-sonos-spotify:spotify%3atrack%3a2wCPMWR3y4xclijuCcLJv7?sid=9&amp;flags=0')
+  elsif msg.to_s == 'Rudolph the red-nosed reindeer'
+    start_christmas('x-sonos-spotify:spotify%3atrack%3a4o8Zh55Xh9sBPJCM1g0Lf7?sid=9&amp;flags=0')
   end
 
   start_christmas('x-sonos-spotify:spotify%3atrack%3a66mB55sZuDHlXt3vAcVkXf?sid=9&amp;flags=0') if msg.to_s == 'christmas'
@@ -66,7 +70,6 @@ def cycle
     sleep 2
     turn_green
 
-    @speaker.stop if Time.now > @time + 11
   end
   @light.set_state(xy: [color[0], color[1]])
 end
@@ -82,10 +85,7 @@ end
 def initialize_variables
   @client = Hue::Client.new
   @light = @client.lights.fetch(1)
-  while @light.name != 'Hue color lamp 2'
-    @client = Hue::Client.new
-    @light = @client.lights.fetch(1)
-  end
+  @light = @client.lights.fetch(1) while @light.name != 'Hue color lamp 2'
 
   @system = Sonos::System.new
   @speaker = @system.speakers.fetch(0)

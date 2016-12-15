@@ -63,6 +63,7 @@ end
 
 def play(song)
   song.to_s.slice! '?sid=9&amp;flags=0'
+  song.to_s.slice! '?sid=9&flags=0'
   if @speaker.now_playing[:uri] == song + '?sid=9&flags=0'
     @speaker.play
   else

@@ -26,18 +26,25 @@ ws.on :message do |msg|
     start_christmas('x-sonos-spotify:spotify%3atrack%3a4o8Zh55Xh9sBPJCM1g0Lf7?sid=9&amp;flags=0')
   end
 
-  start_christmas('x-sonos-spotify:spotify%3atrack%3a66mB55sZuDHlXt3vAcVkXf?sid=9&amp;flags=0') if msg.to_s == 'christmas'
+  stop if msg.to_s == 'Stop'
+
+  start_christmas('x-sonos-spotify:spotify%3atrack%3a66mB55sZuDHlXt3vAcVkXf?sid=9&flags=0') if msg.to_s == 'christmas'
 end
 
 ws.on :open do
   puts "-- websocket open (#{ws.url})"
   ws.send 'ping'
+  @time = Time.now + 1800
+end
+
+ws.on :message do
+  ws.close if Time.now > @time
 end
 
 ws.on :error do |e|
-  puts "-- error (#{e.inspect})"
+  puts "-- error (#{e.inspect})" + "\n"
   puts Time.now.to_s
-  ws.close
+  ws.connect('ws://kerst-2016-server.herokuapp.com')
 end
 
 ws.on :close do
@@ -47,6 +54,7 @@ end
 
 def start_christmas(song)
   initialize_variables
+  @speaker.volume = 5
   @time = Time.now
   play(song)
   @speaker.play
@@ -54,22 +62,28 @@ def start_christmas(song)
 end
 
 def play(song)
-  @speaker.play song
-  @speaker.volume = 5
+  song.to_s.slice! '?sid=9&amp;flags=0'
+  if @speaker.now_playing[:uri] == song + '?sid=9&flags=0'
+    @speaker.play
+  else
+    @speaker.play song + '?sid=9&amp;flags=0'
+  end
 end
 
 def stop
-  @speaker.stop
+  initialize_variables
+  @speaker.pause
 end
 
 def cycle
   color = [@light.x, @light.y]
-  while @speaker.is_playing?
-    sleep 2
-    turn_red
-    sleep 2
-    turn_green
-
+  Thread.new do
+    while @speaker.is_playing?
+      sleep 2
+      turn_red
+      sleep 2
+      turn_green
+    end
   end
   @light.set_state(xy: [color[0], color[1]])
 end

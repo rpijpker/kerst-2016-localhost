@@ -1,17 +1,15 @@
 #!/usr/bin/env ruby
 $:.unshift File.expand_path '../lib', File.dirname(__FILE__)
 require 'rubygems'
-require 'websocket-client-simple'
 require 'hue'
+require 'websocket-client-simple'
 require 'sonos'
 
-puts "websocket-client-simple v#{WebSocket::Client::Simple::VERSION}"
 puts Time.now.to_s
-
-ws = WebSocket::Client::Simple.connect 'ws://kerst-2016-server.herokuapp.com'
+ws = WebSocket::Client::Simple.connect 'wss://kerst-2016-server.herokuapp.com:443'
 
 ws.on :message do |msg|
-  puts ">> #{msg.data}"
+  puts ">> #{msg.data} " + Time.now.to_s
   if msg.to_s == 'Driving home for Christmas'
     start_christmas('x-sonos-spotify:spotify%3atrack%3a66mB55sZuDHlXt3vAcVkXf?sid=9&amp;flags=0')
   elsif msg.to_s == 'All I want for Christmas is you'
@@ -29,16 +27,14 @@ ws.on :message do |msg|
   stop if msg.to_s == 'Stop'
 
   start_christmas('x-sonos-spotify:spotify%3atrack%3a66mB55sZuDHlXt3vAcVkXf?sid=9&flags=0') if msg.to_s == 'christmas'
+
+  ws.close if Time.now > @time
 end
 
 ws.on :open do
   puts "-- websocket open (#{ws.url})"
   ws.send 'ping'
   @time = Time.now + 1800
-end
-
-ws.on :message do
-  ws.close if Time.now > @time
 end
 
 ws.on :error do |e|
@@ -77,7 +73,6 @@ def stop
 end
 
 def cycle
-  color = [@light.x, @light.y]
   Thread.new do
     while @speaker.is_playing?
       sleep 2
@@ -85,22 +80,28 @@ def cycle
       sleep 2
       turn_green
     end
+    sleep 1
+    @light.each do |light|
+      light.set_state(xy: [0.4387, 0.4047])
+    end
   end
-  @light.set_state(xy: [color[0], color[1]])
 end
 
 def turn_green
-  @light.set_state(xy: [0.05, 0.85])
+  @light.each do |light|
+    light.set_state(xy: [0.05, 0.85])
+  end
 end
 
 def turn_red
-  @light.set_state(xy: [0.7, 0.3])
+  @light.each do |light|
+    light.set_state(xy: [0.7, 0.3])
+  end
 end
 
 def initialize_variables
   @client = Hue::Client.new
-  @light = @client.lights.fetch(1)
-  @light = @client.lights.fetch(1) while @light.name != 'Hue color lamp 2'
+  @light = @client.lights
 
   @system = Sonos::System.new
   @speaker = @system.speakers.fetch(0)
@@ -115,3 +116,4 @@ end
 loop do
   ws.send STDIN.gets.strip
 end
+

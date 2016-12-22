@@ -80,27 +80,30 @@ def cycle
       turn_green
     end
     sleep 1
-    @light.each do |light|
+    @lights.each do |light|
       light.set_state(xy: [0.4387, 0.4047])
     end
   end
 end
 
 def turn_green
-  @light.each do |light|
-    light.set_state(xy: [0.05, 0.85])
-  end
+  @light1.set_state(xy: [0.05, 0.85])
+  @light3.set_state(xy: [0.7, 0.3])
+  @light2.set_state(xy: [0.05, 0.85])
 end
 
 def turn_red
-  @light.each do |light|
-    light.set_state(xy: [0.7, 0.3])
-  end
+  @light1.set_state(xy: [0.7, 0.3])
+  @light3.set_state(xy: [0.05, 0.85])
+  @light2.set_state(xy: [0.7, 0.3])
 end
 
 def initialize_variables
   @client = Hue::Client.new
-  @light = @client.lights
+  @lights = @client.lights
+  @light1 = @client.lights.fetch(0)
+  @light2 = @client.lights.fetch(1)
+  @light3 = @client.lights.fetch(2)
 
   @system = Sonos::System.new
   @speaker = @system.speakers.fetch(0)

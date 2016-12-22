@@ -28,13 +28,13 @@ ws.on :message do |msg|
 
   start_christmas('x-sonos-spotify:spotify%3atrack%3a66mB55sZuDHlXt3vAcVkXf?sid=9&flags=0') if msg.to_s == 'christmas'
 
-  #ws.close if Time.now > @time
+  ws.close if Time.now > @time
 end
 
 ws.on :open do
   puts "-- websocket open (#{ws.url})"
   ws.send 'ping'
-  #@time = Time.now + 1800
+  @time = Time.now + 1800
 end
 
 ws.on :error do |e|
@@ -44,6 +44,7 @@ ws.on :error do |e|
 end
 
 ws.on :close do
+  sleep 1
   ws.connect('ws://kerst-2016-server.herokuapp.com')
 end
 
@@ -79,33 +80,26 @@ def cycle
       sleep 2
       turn_green
     end
-    sleep 1
-    @light.each do |light|
-      light.set_state(xy: [0.4387, 0.4047])
-    end
+  @light.set_state(xy: [0.4387, 0.4047])
   end
 end
 
 def turn_green
-  @light.each do |light|
-    light.set_state(xy: [0.05, 0.85])
-  end
+  @light.set_state(xy: [0.05, 0.85])
 end
 
 def turn_red
-  @light.each do |light|
-    light.set_state(xy: [0.7, 0.3])
-  end
+  @light.set_state(xy: [0.7, 0.3])
 end
 
 def initialize_variables
   @client = Hue::Client.new
-  @light = @client.lights
+  @light = @client.lights.fetch(1)
+  @light = @client.lights.fetch(1) while @light.name != 'Hue color lamp 2'
 
   @system = Sonos::System.new
   @speaker = @system.speakers.fetch(0)
-  i = 0
-  while @speaker.name != 'Kantine'
+  i = 0  while @speaker.name != 'Kantine'
     i = 0 if i > 7
     @speaker = @system.speakers.fetch(i)
     i += 1

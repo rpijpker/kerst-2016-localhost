@@ -12,7 +12,7 @@ ws.on :message do |msg|
   puts ">> #{msg.data} " + Time.now.to_s
   stop if msg.to_s == 'Stop'
 
-  start_christmas('x-sonos-spotify:spotify%3atrack%3a66mB55sZuDHlXt3vAcVkXf?sid=9&flags=0') if msg.to_s == 'christmas'
+  start_christmas('x-sonos-spotify:spotify%3atrack%3a6aDJzL3rPWbsn9DU640Cst?sid=9&amp;flags=0') if msg.to_s == 'christmas'
 
   #ws.close if Time.now > @time
 end
@@ -42,13 +42,13 @@ def start_christmas(song)
 end
 
 def play(song)
-  #song.to_s.slice! '?sid=9&amp;flags=0'
-  #song.to_s.slice! '?sid=9&flags=0'
-  #if @speaker.now_playing[:uri] == song + '?sid=9&flags=0'
-  #  @speaker.play
-  #else
-    @speaker.play song #+ '?sid=9&amp;flags=0'
-  #end
+  song.to_s.slice! '?sid=9&amp;flags=0'
+  song.to_s.slice! '?sid=9&flags=0'
+  if @speaker.now_playing[:uri] == song + '?sid=9&flags=0'
+    @speaker.play
+  else
+    @speaker.play song + '?sid=9&amp;flags=0'
+  end
 end
 
 def stop
